@@ -1,0 +1,1179 @@
+<html>
+<head>
+  <title>Crystal Report rerun process.</title>
+</head>
+<style>
+
+ input[type=text], input[type=password] {
+    width: 100%;
+    padding: 12px 20px;
+    margin: 8px 0;
+    display: inline-block;
+    border: 1px solid #ccc;
+    box-sizing: border-box;
+}
+
+/* Set a style for all buttons */
+button {
+    background-color: #4CAF50;
+    color: white;
+    padding: 14px 20px;
+    margin: 8px 0;
+    border: none;
+    cursor: pointer;
+    width: 100%;
+}
+
+/* Extra styles for the cancel button */
+.cancelbtn {
+    width: auto;
+    padding: 10px 18px;
+    background-color: #f44336;
+}
+
+.imgoptioncontainer {
+    text-align: left;
+	 cursor: pointer;
+    margin: 24px 0 12px 0;
+    position: relative;
+}
+
+
+/* Center the image and position the close button */
+.imgcontainer {
+    text-align: center;
+	 cursor: pointer;
+    margin: 24px 0 12px 0;
+    position: relative;
+}
+
+.container {
+    text-align: center;
+    padding: 16px;
+}
+
+span.psw {
+    float: right;
+    padding-top: 16px;
+}
+
+/* The Modal (background) */
+.modal {
+    display: none; /* Hidden by default */
+    position: fixed; /* Stay in place */
+    z-index: 1; /* Sit on top */
+    left: 0;
+    top: 0;
+    width: 100%; /* Full width */
+    height: 35%; /* Full height */
+   
+	background-color: rgb(0,0,0); /* Fallback color */
+    background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
+  
+}
+
+/* Modal Content/Box */
+.modal-content {	
+    background-color: #fefefe;
+    margin: 3%; /* 5% from the top, 15% from the bottom and centered */
+    border: 1px solid #888;
+    width: 100%; /* Could be more or less, depending on screen size */
+}
+
+/* The Close Button (x) */
+.close {
+    position: absolute;
+    right: 25px;
+    top: 0;
+    color: #000;
+    font-size: 35px;
+    font-weight: bold;
+}
+
+.close:hover,
+.close:focus {
+    color: red;
+    cursor: pointer;
+}
+
+/* Add Zoom Animation */
+.animate {
+    -webkit-animation: animatezoom 0.6s;
+    animation: animatezoom 0.6s
+}
+
+@-webkit-keyframes animatezoom {
+    from {-webkit-transform: scale(0)} 
+    to {-webkit-transform: scale(1)}
+}
+    
+@keyframes animatezoom {
+    from {transform: scale(0)} 
+    to {transform: scale(1)}
+}
+
+/* Change styles for span and cancel button on extra small screens */
+@media screen and (max-width: 300px) {
+    span.psw {
+       display: block;
+       float: none;
+    }
+    .cancelbtn {
+       width: 100%;
+    }
+}
+
+
+	.DetailTable {
+		border: solid 1px #DDEEEE;
+		border-collapse: collapse;
+		border-spacing: 0;
+		font: normal 13px Arial, sans-serif;
+	}
+	.DetailTable thead th {
+		background-color: #DDEFEF;
+		border: solid 1px #DDEEEE;
+		color: #336B6B;
+		padding: 10px;
+		text-align: left;
+		text-shadow: 1px 1px 1px #fff;
+	}
+	.DetailTable tbody td {
+		border: solid 1px #DDEEEE;
+		color: #333;
+		
+		text-shadow: 1px 1px 1px #fff;
+	}
+
+
+	.DetailTable-zebra tbody tr:nth-child(odd) {
+		background-color: #fff;
+	}
+	.DetailTable-zebra tbody tr:nth-child(even) {
+		background-color: #EEF7EE;
+	}
+	.DetailTable-horizontal tbody td {
+		border-left: none;
+		border-right: none;
+	}
+ 
+
+#container
+{
+position: absolute;
+top: 50%;
+left: 50%;
+border: 3px solid black;
+width: 400px;
+height: 300px;
+margin-left: -200px;
+margin-top: -150px;
+display:none;
+background-color: #EEF7EE;
+}
+
+
+</style>
+ <SCRIPT>
+
+var sPublicCodeTable =""
+  /* This function also gets the value of commandLine,
+     which cannot be set as an attribute  */
+  var sSourceRow="";
+ function runCmd(command)
+{
+    var wsh = new ActiveXObject('WScript.Shell');
+    if (wsh)
+    {
+        wsh.Run(command);
+    }
+}
+
+function del_tr(remtr,trname)  
+{   
+	var wTable = "";
+	var dTable="";
+	var btnclose="";
+	var btnparameter="";
+	var sVarible = "";
+	var objtr=trname;
+
+	
+    if (confirm("Are you delete row [Yes] / Change Parameter [No] ?"))
+		{
+			while((remtr.nodeName.toLowerCase())!='tr')
+				remtr = remtr.parentNode;
+
+			remtr.parentNode.removeChild(remtr);
+	    }else{
+			document.getElementById('container').style.display='block';
+			var spParameter =  remtr.innerHTML.replace("<TD>","").replace("</TD>","").split("-a");
+			for (j in  spParameter)
+			{
+				if (j >0)
+				{
+					 if (sVarible !=""){sVarible = sVarible + ",";}
+					 sVarible = sVarible + "Parameter_Row_"+ j ;
+
+					 dTable=dTable+"<tr style='cursor:pointer'>";
+					 dTable=dTable+"	<td>";
+					 dTable=dTable+ "<label id=Parameter_Key_" + j +" >" +  spParameter[j] + "</label>" ;
+					 dTable=dTable+"	</td>";
+ 					 dTable=dTable+"	<td>";
+					 dTable=dTable+"<input type='text' name=Parameter_Value_" + j +" />";
+					 dTable=dTable+"	</td>";
+					 dTable=dTable+"</tr>";
+
+
+				}
+			}
+ 			
+			btnclose="<div align='right'> <b>Change Parameter / Record </b> <a href='#' class='cancel' onclick=document.getElementById('container').style.display='none';>&times;</a> </div>";
+			wTable="<table  id='soureTable' class='DetailTable DetailTable-zebra DetailTable-horizontal' style='width:100%'>" +  dTable +"</table>"
+			btnparameter="<BUTTON onclick='replace_tr(" + objtr.id +"," + j +");'> Parameter </BUTTON>";
+			document.getElementById('container').innerHTML = btnclose + wTable + btnparameter;
+			
+		}
+
+}
+
+function replace_tr(objtr,inArray)
+{
+var sKey="";
+var sValue="";
+var sReplaceHTML="";
+
+sReplaceHTML=objtr.innerHTML;
+		for (var j=0;j <= inArray;j++)
+			{
+				if (j >0)
+				{
+					sKey="Parameter_Key_"+j;	
+					sValue="Parameter_Value_"+j;				
+					var Parameter_key = document.getElementById(sKey);
+					var Parameter_value = document.getElementById(sValue);
+					if (Parameter_key != null &&  Parameter_value != null)
+					{				
+						if (Parameter_key.innerHTML != "" && Parameter_value.value !="")
+						{
+							sReplaceHTML =   sReplaceHTML.replace(Parameter_key.innerHTML,Parameter_value.value);
+						}						
+					}					
+				}
+			}
+			 objtr.deleteCell(0);
+			 objtr.insertCell(0).innerHTML=sReplaceHTML.replace("<TD>","").replace("</TD>","");
+			 document.getElementById('container').style.display='none';
+}
+
+
+function del_id(id)  
+{   
+        del_tr(document.getElementById(id));
+}
+
+ function highlightAndRow(){
+ var table = document.getElementById('soureTable');
+
+ for (var i=0;i < table.rows.length;i++){
+  table.rows[i].onclick= function () {
+
+	   if(!this.hilite){
+		this.origColor=this.style.backgroundColor;
+		this.style.backgroundColor='#BCD4EC';
+		this.hilite = true;
+	  }
+	   else{
+		this.style.backgroundColor=this.origColor;
+		this.hilite = false;
+	   }
+	  }
+ }
+}
+ function RowSelect(xText,xPath,divName){
+ 
+	 var xReplace =xText.toUpperCase().replace(xPath.toUpperCase(),"");
+	 var pathFile ='';
+	 var xDelimited ='\\';
+	 var xFullPath =''
+	 var spSplit ;
+	 var xResult='';
+	 
+	 
+	 var dTable="";
+	 var wTable="";
+			var tFilterReport = document.getElementById('tFilterReport');
+			tFilterReport.value="";
+
+
+			if (document.getElementById('rdn_radio_daily').checked)
+					{
+						pathFile = "\\\\ebrapprw2\\CREXPORT\\Daily";
+					}
+			else if (document.getElementById('rdn_radio_weekly').checked)
+					{
+						pathFile = "\\\\ebrapprw2\\CREXPORT\\Weekly";
+					}
+			else if (document.getElementById('rdn_radio_monthly').checked)
+					{
+						pathFile = "\\\\ebrapprw2\\CREXPORT\\Monthly\\Database";
+					}
+		
+		xFullPath=pathFile.concat(xDelimited,xReplace);
+		xResult=readFile(xFullPath);
+		spSplit = xResult.split("\n"); 
+
+//var didTheyPressOK = window.confirm('Are you sure you want to XXXXX?');
+
+		for (var i=0;i < spSplit.length;i++){
+			 dTable=dTable+"<tr style='cursor:pointer' id=tr_source_csv_" + i + " onclick='del_tr(this,tr_source_csv_"+i +");' >";
+			 dTable=dTable+"	<td>";
+			 dTable=dTable+ spSplit[i];
+			 dTable=dTable+"	</td>";
+			 dTable=dTable+"</tr>";
+		}
+
+		wTable="<table  id='soureTable' class='DetailTable DetailTable-zebra DetailTable-horizontal' style='width:100%'>" +  dTable +"</table>"
+	   document.getElementById(divName).innerHTML = wTable;
+		sPublicCodeTable = wTable;
+
+}
+
+function showCodeReportForOther(xfilname,divName){
+	var spSplit ;
+	var xResult='';	
+	var dTable="";
+	var wTable="";
+
+
+	var TableSource = document.getElementById('TableSource');
+	var tFilterReport = document.getElementById('tFilterReport');
+
+		tFilterReport.value="";
+		TableSource.innerHTML="";
+
+		xResult=readFile(xfilname);
+		
+		spSplit = xResult.split("\n"); 
+
+		for (var i=0;i < spSplit.length;i++){
+			 dTable=dTable+"<tr >";
+			 dTable=dTable+"	<td>";
+			 dTable=dTable+ spSplit[i];
+			 dTable=dTable+"	</td>";
+			 dTable=dTable+"</tr>";
+		}
+
+		wTable="<table  id='soureTable' class='DetailTable DetailTable-zebra DetailTable-horizontal' style='width:100%'>" +  dTable +"</table>"
+	    document.getElementById(divName).innerHTML = wTable;
+		sPublicCodeTable = wTable;
+		
+
+}
+ 
+
+
+  function fnShowProp()
+  {
+    sTempStr = "applicationName  = " + oHTA.applicationName + "\n" + 
+               "border           = " + oHTA.border          + "\n" +
+               "borderStyle      = " + oHTA.borderStyle     + "\n" + 
+               "caption          = " + oHTA.caption         + "\n" +
+               "commandLine      = " + oHTA.commandLine     + "\n" +
+               "icon             = " + oHTA.icon            + "\n" +
+               "maximizeButton   = " + oHTA.maximizeButton  + "\n" +
+               "minimizeButton   = " + oHTA.minimizeButton  + "\n" + 
+               "showInTaskBar    = " + oHTA.showInTaskBar   + "\n" +
+               "singleInstance   = " + oHTA.singleInstance  + "\n" +  
+               "sysMenu          = " + oHTA.sysMenu         + "\n" + 
+               "version          = " + oHTA.version         + "\n" + 
+               "windowState      = " + oHTA.windowState     + "\n" ;
+		  
+    oPre.innerText = sTempStr;		  
+  }
+ 
+function readFile(filename){
+    var fso = new ActiveXObject("Scripting.FileSystemObject");
+
+    var ForReading = 1;
+    var f1 = fso.OpenTextFile(filename, ForReading);
+    var text = f1.ReadAll();
+
+    f1.close();
+	f1 =null;
+    return text;
+}
+
+function objToString (obj) {
+    var str = '';
+	
+    for (var p in obj) {
+	 
+		
+        if (obj.hasOwnProperty(p)) {
+            str += p + '::' + obj[p] + '\n';
+        }
+    }
+    return str;
+}
+
+   function fnShowsource(divName,divNameClear)
+  {
+		var pathFile;
+		var runSelect;
+
+		
+		var dTable="";
+		var wTable="";
+		var pathReportCode= document.getElementById('pathReportCode');
+		var tFilterReport = document.getElementById('tFilterReport');
+				tFilterReport.value="";
+
+	 if (document.getElementById('rdn_radio_other').checked  && pathReportCode.value==""){
+		alert("Please Specific Path Other")
+		pathReportCode.focus();
+	 }else{
+
+
+		if (document.getElementById('rdn_radio_daily').checked)
+				{
+					runSelect="Daily"
+					pathFile = "\\\\ebrapprw2\\CREXPORT\\Daily";
+					pathReportCode.value="";
+				}
+		else if (document.getElementById('rdn_radio_weekly').checked)
+				{
+					runSelect="Weekly"
+					pathFile = "\\\\ebrapprw2\\CREXPORT\\Weekly";
+					pathReportCode.value="";
+				}
+		else if (document.getElementById('rdn_radio_monthly').checked)
+				{
+					runSelect="Monthly"
+					pathFile = "\\\\ebrapprw2\\CREXPORT\\Monthly\\Database";
+					pathReportCode.value="";
+				}
+		else if (document.getElementById('rdn_radio_other').checked)
+				{
+					runSelect="Other"
+					pathFile = pathReportCode.value;
+					
+				}
+	
+
+		var fso = new ActiveXObject("Scripting.FileSystemObject");
+		var i=0;	
+		
+		if (document.getElementById('rdn_radio_other').checked ==false ) {
+			if (fso.folderexists(pathFile))
+			{
+				var folder = fso.getfolder(pathFile);
+				var files = folder.files; 
+				var myEnum = new Enumerator(folder.files);
+				var sText ="";
+				while(!myEnum.atEnd()){
+						sText=readFile(myEnum.item());
+					 if (sText.indexOf("crexport.exe -f") > -1)
+					 {
+
+						 i = i +1;	
+						  dTable=dTable+"<tr style='cursor: pointer;' onclick=RowSelect('"+ myEnum.item() +"','" + pathFile +"','TableCodeReport')>";				
+						  dTable= dTable + "<td>" + myEnum.item()  +  "</td>";			
+						  dTable=dTable+"</tr>";
+					 }
+				  myEnum.moveNext();
+				}
+			}
+				wTable="<table  id='soureTable' class='DetailTable DetailTable-zebra DetailTable-horizontal' style='width:100%'>" + dTable +"</table>"
+				document.getElementById(divName).innerHTML = wTable;
+				document.getElementById(divNameClear).innerHTML = "";
+		}else{
+				showCodeReportForOther(pathFile,'TableCodeReport');
+
+		}
+
+
+		
+	
+		}
+  }
+
+ 
+function fnSearchReport()
+{
+var table = document.getElementById('TableCodeReport');
+var tFilterReport = document.getElementById('tFilterReport');
+var rowtr =table.getElementsByTagName("tr");
+
+ 
+var xResult="";
+var xKeep="";
+var ss ;
+var sMessage = "";
+	
+	
+
+	if (sPublicCodeTable != "")
+	{
+	table.innerHTML=sPublicCodeTable;
+	rowtr =table.getElementsByTagName("tr");
+
+		if (tFilterReport.value != "")
+		{			 
+			sMessage= tFilterReport.value;
+			 ss = sMessage.split("+");
+			for (var s in ss) {				
+			 for (var i=0;i < rowtr.length;i++){
+					xResult =  rowtr[i].innerHTML;	
+					
+						if (xResult.indexOf(ss[s]) > -1 )
+						{							
+							
+							xKeep = xKeep + "<tr style='cursor:pointer' id=tr_source_csv_" + i + " onclick='del_tr(this,tr_source_csv_" + i +");' >"	+ xResult + "</tr>";
+						}	
+					
+				 }
+			}	   
+			document.getElementById('TableCodeReport').innerHTML="<table  id='soureTable' class='DetailTable DetailTable-zebra DetailTable-horizontal' style='width:100%'>" + xKeep +"</table>";
+
+
+		}else{
+			tFilterReport.focus();
+			alert("Please Input Report Name")
+		}	
+	}else{
+		alert("Please Select Source")
+ }
+	
+}
+
+
+function fnshowParameter()
+{
+var table = document.getElementById('TableCodeReport');
+var rowtr =table.getElementsByTagName("tr");
+var btnShowReport = document.getElementById('btnShowReport');
+
+var dStartDate =document.getElementById('sDate');
+var dEndDate =document.getElementById('eDate');
+ 
+
+
+
+	if (rowtr.length > 0)
+	{
+
+			if (document.getElementById('rdn_radio_daily').checked)
+					{
+						if(dStartDate.value == "" ){dStartDate.value="D";}
+						if(dEndDate.value == "" ){dEndDate.value="D";}
+						
+					}
+			else if (document.getElementById('rdn_radio_weekly').checked)
+					{
+						if(dStartDate.value == "" ){dStartDate.value="W";}
+						if(dEndDate.value == "" ){dEndDate.value="W";}
+						
+					}
+			else if (document.getElementById('rdn_radio_monthly').checked)
+					{
+						if(dStartDate.value == "" ){dStartDate.value="M";}
+						if(dEndDate.value == "" ){dEndDate.value="M";}
+						
+					}
+		
+
+
+	document.getElementById('id02').style.display='block';
+	 }else{
+	alert("Please Select Source")
+	btnShowReport.focus();
+ }
+	
+}
+function str_pad(n) {
+    return String("00" + n).slice(-2);
+}
+
+function fnOpenOption(){
+		
+	var tUserDB =document.getElementById('uUserDB');
+	var tPasswordDB =document.getElementById('tPasswordDB');
+	var tDatabase =document.getElementById('tDatabaseDB');
+	var tApplicationPath =document.getElementById('tApplicationPath');
+	var tSourcePath =document.getElementById('tSourcePath');
+	var tDestinationPath =document.getElementById('tDestinationPath');
+
+		if (confirm("Option Run Report ?"))
+		{
+			tUserDB.disabled   = false;
+			tPasswordDB.disabled  = false;
+			tDatabase.disabled  = false
+			tApplicationPath.disabled  = false;
+			tSourcePath.disabled  = false;
+			tDestinationPath.disabled = false;	
+			tUserDB.focus();
+		}
+}
+
+function isNumber(n) {
+  return !isNaN(parseFloat(n)) && isFinite(n);
+}
+
+function fnParameter()  
+  {
+var table = document.getElementById('TableCodeReport');
+var rowtr =table.getElementsByTagName("tr");
+
+var dStartDate =document.getElementById('sDate');
+var dEndDate =document.getElementById('eDate');
+ 
+
+var tUserDB =document.getElementById('uUserDB');
+var tPasswordDB =document.getElementById('tPasswordDB');
+var tDatabase =document.getElementById('tDatabaseDB');
+var tApplicationPath =document.getElementById('tApplicationPath');
+var tSourcePath =document.getElementById('tSourcePath');
+var tDestinationPath =document.getElementById('tDestinationPath');
+var pParameterFind1 =document.getElementById('pParameterFind1');
+var pParameterValue1 =document.getElementById('pParameterValue1');
+var pParameterFind2 =document.getElementById('pParameterFind2');
+var pParameterValue2 =document.getElementById('pParameterValue2');
+var pParameterFind3 =document.getElementById('pParameterFind3');
+var pParameterValue3 =document.getElementById('pParameterValue3');
+
+var loopReport =document.getElementById('loopReport');
+
+var xResult="";
+var xKeep="";
+ if( tUserDB.value == ""){
+	 alert('Please input User Database')
+	 tUserDB.focus();
+ }else if( tPasswordDB.value == ""){
+	 alert('Please input Password Database')
+	 tPasswordDB.focus();
+ }else if( tDatabase.value == ""){
+	 alert('Please input Database Name')  
+	 tDatabase.focus();
+ }else if( tApplicationPath.value == ""){
+	alert('Please input Application Path')
+	tApplicationPath.focus();
+ }else if( tSourcePath.value == ""){
+ 	alert('Please input Source Code Path')
+	tSourcePath.focus();
+ }else if( tDestinationPath.value == ""){
+ 	alert('Please input Destination Path')
+	tDestinationPath.focus();
+ }else if (dStartDate.value == "" ){
+	alert('Please input start date (YYYYMMDD)')
+	dStartDate.focus();
+ }else if( dEndDate.value == ""){
+ 	alert('Please input end date (YYYYMMDD)')
+	dEndDate.focus();
+  
+
+ }else{
+ var dCurrenetDate = new Date();
+ var dDate = dCurrenetDate.getDate();
+ var sDay =  str_pad(dCurrenetDate.getDate());
+ var sYear = dCurrenetDate.getFullYear();
+ var sHour = dCurrenetDate.getHours();
+ var sMSecond = dCurrenetDate.getMilliseconds();
+ var sMinutes = dCurrenetDate.getMinutes();
+ var sMonth = str_pad(dCurrenetDate.getMonth()+1);
+ var sSecond = dCurrenetDate.getSeconds();
+ var sTime = dCurrenetDate.getTime();
+ var xCommandRun ="";
+ var xCommandLoop ="";
+ var sRerundate = "";
+ var sCurrentTime = sYear + "-" + sMonth + "-" + sDay + "-" + sHour + "-" + sMinutes + "-" + sSecond;
+ var isRun =false;
+ var isLoop=false;
+ var iEndDate = 0;
+ var iStartDate = 0;
+ var iLoopDate = 0;
+ if (dStartDate.value != "D")
+ {
+	sCurrentTime = dStartDate.value + "_" + sCurrentTime;
+ }
+
+isRun = (confirm("Are you Run Report [Yes] or Validate Report [No] ?")); 
+isLoop=(loopReport.checked);
+
+for (var i=0;i < rowtr.length;i++){
+	xResult =   rowtr[i].innerHTML;
+	xResult =  xResult.replace("$UserDB",tUserDB.value);
+	xResult =  xResult.replace("$PasswordDB",tPasswordDB.value);
+	xResult =  xResult.replace("$ServerDB",tDatabase.value);
+
+	xResult =  xResult.replace("$ApplicationPath",tApplicationPath.value);
+	xResult =  xResult.replace("$InputPath",tSourcePath.value);
+	xResult =  xResult.replace("$OutputPath",tDestinationPath.value);
+
+	xResult =  xResult.replace("date_start :D-2","date_start :"+dStartDate.value);
+	xResult =  xResult.replace("date_end :D-2","date_end :"+dEndDate.value);
+
+	xResult =  xResult.replace("date_start :D","date_start :"+dStartDate.value);
+	xResult =  xResult.replace("date_end :D","date_end :"+dEndDate.value);
+	xResult =  xResult.replace("$SystemDate",sCurrentTime);
+
+	if (pParameterFind1.value != "" && pParameterValue1.value !="")
+	{
+			xResult =  xResult.replace(pParameterFind1.value,pParameterValue1.value);
+	}
+	if (pParameterFind2.value != "" && pParameterValue2.value !="")
+	{
+			xResult =  xResult.replace(pParameterFind2.value,pParameterValue2.value);
+	}
+	if (pParameterFind3.value != "" && pParameterValue3.value !="")
+	{
+			xResult =  xResult.replace(pParameterFind3.value,pParameterValue3.value);
+	}
+	xCommandRun = xResult.replace("<TD>","");
+	xCommandRun = xCommandRun.replace("</TD>","");
+	 
+
+		if (isRun)
+		{			
+			if (isLoop)
+			{
+				if (document.getElementById('rdn_radio_daily').checked && (dStartDate.value !="D" && dEndDate.value  !="D") && (isNumber(dStartDate.value) && isNumber(dEndDate.value))){		
+						iEndDate = dEndDate.value;
+						iStartDate = dStartDate.value;
+						iLoopDate= dateDiffInDays( iStartDate , iEndDate );
+						
+						for (var d=0;d <= iLoopDate;d++){				
+							xCommandLoop=xCommandRun;		
+							
+						    xCommandLoop=xCommandLoop.replace("date_start :"+dStartDate.value,"date_start :"+addDays(iStartDate,d)).replace("date_end :"+dEndDate.value,"date_end :"+addDays(iStartDate,d));
+						
+							runCmd(xCommandRun);
+						}
+						//runCmd(xCommandRun);
+				}else{
+					
+					runCmd(xCommandRun);
+				}	
+				
+				  /*else if (document.getElementById('rdn_radio_weekly').checked && (dStartDate.value !="W" && dEndDate.value  !="W") && (isNumber(dStartDate.value) && isNumber(dEndDate.value))){
+						iEndDate = dEndDate.value;
+						iStartDate = dStartDate.value;
+						iLoopDate= (weekofyear(convertformatTodate(iEndDate)) - weekofyear(convertformatTodate(iStartDate)))
+
+						 alert(iLoopDate);
+
+
+						for (var d=0;d <= iLoopDate;d++){				
+							xCommandLoop=xCommandRun
+						    xCommandLoop=xCommandLoop.replace("date_start :"+dStartDate.value,"date_start :"+d).replace("date_end :"+dEndDate.value,"date_end :"+d);
+							alert(xCommandLoop);
+						}
+						//runCmd(xCommandRun);
+				}else if (document.getElementById('rdn_radio_monthly').checked &&(dStartDate.value !="M" && dEndDate.value  !="M") && (isNumber(dStartDate.value) && isNumber(dEndDate.value))){
+						iEndDate = dEndDate.value;
+						iStartDate = dStartDate.value;
+						iLoopDate= (iEndDate - iStartDate)
+						for (var d=0;d <= iLoopDate;d++){				
+							xCommandLoop=xCommandRun
+						    xCommandLoop=xCommandLoop.replace("date_start :"+dStartDate.value,"date_start :"+d).replace("date_end :"+dEndDate.value,"date_end :"+d);
+							alert(xCommandLoop);
+						}
+						//runCmd(xCommandRun);
+				}*/
+			}else{
+				runCmd(xCommandRun);
+			}			
+		} 
+	xKeep = xKeep +"<tr>"+ xResult + "</tr>";
+   }
+    document.getElementById('TableCodeReport').innerHTML="<table  id='soureTable' class='DetailTable DetailTable-zebra DetailTable-horizontal' style='width:100%'>" + xKeep +"</table>"
+	document.getElementById('id02').style.display='none';
+   }
+  }
+
+ function weekofyear(d) {
+  var date = new Date(d.getTime());
+   date.setHours(0, 0, 0, 0);
+  // Thursday in current week decides the year.
+  date.setDate(date.getDate() + 3 - (date.getDay() + 6) % 7);
+  // January 4 is always in week 1.
+  var week1 = new Date(date.getFullYear(), 0, 4);
+  // Adjust to Thursday in week 1 and count number of weeks from date to week1.
+  return 1 + Math.round(((date.getTime() - week1.getTime()) / 86400000
+                        - 3 + (week1.getDay() + 6) % 7) / 7);
+}
+
+
+function convertformatTodate(date) {
+  var sYear = "";
+  var sMonth = "";
+  var sDay = "";
+
+  var returnYear = "";
+  var returnMonth = "";
+  var returnDay = "";
+  var result="";
+  var addValue = new Date();
+
+if ( isNumber(date) && (date.length == 8)){
+      sYear=date.substring(0, 4);		
+	  sMonth=date.substring(4, 6);		
+	  sDay=date.substring(6, 8);		
+      addValue = new Date(sYear ,  parseInt( sMonth ) -1 , sDay);	  
+	}
+   return addValue;
+}
+
+
+function addDays(date, days) {
+  var sYear = "";
+  var sMonth = "";
+  var sDay = "";
+
+  var returnYear = "";
+  var returnMonth = "";
+  var returnDay = "";
+  var result="";
+  var addValue = new Date();
+
+if ( isNumber(date) && (date.length == 8)){
+      sYear=date.substring(0, 4);		
+	  sMonth=date.substring(4, 6);		
+	  sDay=date.substring(6, 8);		
+      addValue = new Date(sYear ,  parseInt( sMonth ) -1 , sDay);	  
+
+	  addValue.setDate(addValue.getDate() + days);
+	
+	  returnYear =	addValue.getFullYear().toString();
+	  returnMonth =	str_pad((addValue.getMonth() + 1).toString());
+	  returnDay = str_pad(addValue.getDate().toString());
+
+
+	  result = returnYear+returnMonth+returnDay;
+
+
+	} else {result =date;}
+   return result;
+}
+
+ 
+
+function dateDiffInDays(a, b) {
+  var _MS_PER_DAY = 1000 * 60 * 60 * 24;
+  var sYear = "";
+  var sMonth = "";
+  var sDay = "";
+
+  var eYear = "";
+  var eMonth = "";
+  var eDay = "";
+  // Discard the time and time-zone information.
+  if ( isNumber(a) && isNumber(b) && (a.length == 8) && (b.length == 8))
+  {	
+	  sYear=a.substring(0, 4);		
+	  sMonth=a.substring(4, 6);		
+	  sDay=a.substring(6, 8);		
+
+	  eYear=b.substring(0, 4);		
+	  eMonth=b.substring(4, 6);	
+	  eDay=b.substring(6, 8);		
+	
+
+	  var utc1 = Date.UTC(sYear ,parseInt(  sMonth)-1, sDay);
+	  var utc2 = Date.UTC(eYear , parseInt( eMonth)-1, eDay);
+      return Math.floor((utc2 - utc1) / _MS_PER_DAY);
+  } else {
+	  return -99
+  }
+
+}
+
+
+  </SCRIPT>
+
+<body style="margin: 0; border: 0;">
+
+
+
+<div id="id01" class="modal">
+  
+  <form class="modal-content animate" >
+    <div class="imgcontainer">
+      <span onclick="document.getElementById('id01').style.display='none'" class="close" title="Close Modal">&times;</span>
+    
+    </div>
+
+    <div class="container">
+
+
+
+      <label><b>Username</b></label>
+      <input type="text" placeholder="Enter Username" name="uname" required>
+
+      <label><b>Password</b></label>
+      <input type="password" placeholder="Enter Password" name="psw" required>
+        
+      <button type="submit">Login</button>
+      <input type="checkbox" checked="checked"> Remember me
+    </div>
+
+    <div class="container" style="background-color:#f1f1f1">
+      <button type="button" onclick="document.getElementById('id01').style.display='none'" class="cancelbtn">Cancel</button>
+      <span class="psw">Forgot <a href="#">password?</a></span>
+    </div>
+  </form>
+</div>
+
+<script>
+// Get the modal
+var modal = document.getElementById('id01');
+
+// When the user clicks anywhere outside of the modal, close it
+window.onclick = function(event) {
+    if (event.target == modal) {
+        modal.style.display = "none";
+    }
+}
+</script>
+
+
+
+
+<div id="id02" class="modal">  
+
+	
+  <form class="modal-content animate" >
+ 
+	<div class="imgcontainer">	 
+      <span onclick="document.getElementById('id02').style.display='none'" class="close" title="Close Modal">&times;</span>
+    </div>
+
+    <div class="container">
+	<table >
+		<tr>
+		<td>
+		  <label><b>User</b></label>
+		</td>
+		
+		
+		<td>
+		  <input type="text" placeholder="User Database" name="uUserDB"  value="RPTPRDAPPR" disabled required  style="width:100%">
+	  </td>
+	  <td>
+		  <label><b>Application Path</b></label>
+		</td>
+		<td>
+			  <input type="text" placeholder="Application Path" name="tApplicationPath"   value="\\ebrapprw2\CREXPORT" disabled  required style="width:100%">
+		</td>
+			</tr>
+ 
+	<tr>
+	<td>
+		  <label><b>Password</b></label>
+		</td>
+		<td>
+			  <input type="password" placeholder="User Database" name="tPasswordDB"  value="inteltion123prdw,j[vd"  disabled required  style="width:100%">
+		</td>
+
+	
+		 <td>
+		  <label><b>Source</b></label>
+		</td>
+		<td>
+			  <input type="text" placeholder="Source Path" name="tSourcePath" value="\\ebrapprw2\CREXPORT" disabled  required style="width:100%">
+		</td>
+	
+	</tr>
+	<tr>
+	<td>
+		<label><b>Database</b></label>
+		</td>
+		<td>
+			  <input type="text" placeholder="Database" name="tDatabaseDB" value="OPRDB" disabled required  style="width:100%">
+		</td>
+
+		 <td>
+		  <label><b>Destination</b></label>
+		</td>
+		<td>
+			  <input type="text" placeholder="Destination Path" name="tDestinationPath"  value="\\ebrapprw2\OPR Share" disabled  required  style="width:100%"> 
+		</td>
+		</tr>
+	 
+		  <tr>
+		<td><label><b>Start Date (YYYYMMDD)</b></label></td>
+		<td> <input type="text" placeholder="Start Date" name="sDate" required  style="width:100%"></td>
+		<td><label><b>End Date (YYYYMMDD)</b></label></td>
+		<td>  <input type="text" placeholder="End Date" name="eDate" required  style="width:100%"></td>
+		 
+
+
+ </tr>
+
+
+	  <tr>
+		
+		<td><label><b>Parameter Find 1</b></label>
+			
+		</td>
+		<td>	<input type="text" placeholder="Parameter 1" name="pParameterFind1"  style="width:100%">	
+			  
+		</td>
+		<td><label><b>Parameter Replace 1</b></label>
+		
+		</td>
+		<td><input type="text" placeholder="Parameter 1" name="pParameterValue1"  style="width:100%">
+		</td>
+	  </tr>
+
+	  <tr>
+		
+		<td><label><b>Parameter Find 2</b></label>
+			
+		</td>
+		<td>	<input type="text" placeholder="Parameter 2" name="pParameterFind2"  style="width:100%">	
+			  
+		</td>
+		<td><label><b>Parameter Replace 2</b></label>
+		
+		</td>
+		<td><input type="text" placeholder="Parameter 2" name="pParameterValue2"  style="width:100%">
+		</td>
+	  </tr>
+
+	    <tr>
+		
+		<td><label><b>Parameter Find 3</b></label>
+			
+		</td>
+		<td>	<input type="text" placeholder="Parameter 3" name="pParameterFind3"  style="width:100%">	
+			  
+		</td>
+		<td><label><b>Parameter Replace 3</b></label>
+		
+		</td>
+		<td><input type="text" placeholder="Parameter 3" name="pParameterValue3"  style="width:100%">
+		</td>
+	  </tr>
+	  <tr>
+		 	<td align="left"  >
+  
+			<button type="button" onclick="fnOpenOption()">Option Report</button>
+
+	  </td>
+ 	<td align="center"  colspan="2">
+
+		<input type="checkbox" name="loopReport" value="loop"><b><font size="3" color="red">Loop Between Daily Start Date - End Date</font></b>
+
+  </td>
+		<td align="right" >
+  
+			<button type="button" onclick="fnParameter()">Run Report</button>
+
+	  </td>
+
+    </table>
+    </div>
+
+ 
+  </form>
+</div>
+
+<script>
+// Get the modal
+var modal = document.getElementById('id02');
+
+// When the user clicks anywhere outside of the modal, close it
+window.onclick = function(event) {
+    if (event.target == modal) {
+        modal.style.display = "none";
+    }
+}
+</script>
+
+
+
+  <table style="border: 0; width: 100%;">
+  <tr  style="vertical-align:top; background: #006DA6;">
+  <td >
+
+  <table  style="width: 100%;">
+  <tr>   
+		<td align="right"  style="width:75%;" >
+		
+			<input type="text" name="tFilterReport"  style="width:100%;" />
+			</td>
+			<td  align="right"  style="width:25%;"  >
+			<button onclick="fnSearchReport()" style="padding:0;" >Search</button>
+		</tr>
+	</table>
+
+  </td>
+  <td>
+
+  <table  style="width: 100%;">
+  <tr>   
+
+  <td align="right" >
+  </td>
+  <td align="right" >
+  </td>
+  
+  <td align="right" >
+  </td>
+  <td align="right" >
+  </td>
+		<td align="right"  style="width:5%;" >
+		
+			<button onclick="fnshowParameter()" style="width:75; padding:0;">Parameter</button>
+		</td>
+			<td align="right"  style="width:5%;" >
+			<button onclick="document.getElementById('id01').style.display='block'" style="width:75; padding:0;" >Login</button>
+			
+			</td>
+		</tr>
+		</table>
+
+  
+  </td> 
+  </tr>
+   <tr> 
+   <td colspan="2" style="background: #006DA6;">
+
+    <table  style="width: 100%;">
+		<tr>  
+		<td  style="width: 10%"> <input  type="radio" name="rdn_radio_type" id="rdn_radio_daily" checked/>Daily</td>
+		<td style="width: 10%"> <input  type="radio" name="rdn_radio_type" id="rdn_radio_weekly" />Weekly</td>
+		<td style="width: 10%">  <input  type="radio" name="rdn_radio_type" id="rdn_radio_monthly" />Monthly</td>
+		<td style="width: 10%">  <input  type="radio" name="rdn_radio_type" id="rdn_radio_other" />Specific Path</td>
+		<td ><input type="file" name="pathReportCode" accept=".csv" style="width: 85%;"/></td>
+		<td  style="width: 10%">
+		 	<BUTTON name="btnShowReport" onclick="fnShowsource('TableSource','TableCodeReport')"  style="width:120; padding:0;">Show Code Report</BUTTON></td>
+		</tr>
+		</table>
+
+	</td> 
+</tr>
+ 
+  <tr>
+    <td style="width: 25%; vertical-align:top">
+	<div id="TableSource">
+	 <h1>File Source</h1>
+	</div>
+	</td>
+    <td style="width: 75%; vertical-align:top">
+		<div id="TableCodeReport">
+			 <h1>Select Source</h1>
+		 </div>
+	</td>
+  </tr>
+  <tr> <td colspan="2" style="background: #006DA6;"><script>  var d = new Date();
+ 
+document.write(d.toLocaleString());  </script>
+</td> </tr>
+  </table>
+<div id="container">
+	
+</div>
+</body>
+</html>
